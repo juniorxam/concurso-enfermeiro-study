@@ -4,6 +4,8 @@
  * IDs desta versão devem permanecer estáveis para preservar o progresso local.
  */
 
+import { enfermagemQuestionBank } from "./enfermagem-question-bank";
+
 export type Accent = "teal" | "coral" | "navy" | "sand";
 
 export type StudyTopic = {
@@ -524,6 +526,7 @@ export const questions: Question[] = [
     correctIndex: 0,
     explanation: "As precauções-padrão orientam práticas seguras para todos os atendimentos conforme risco de exposição. Luvas não substituem a higiene das mãos e precauções específicas dependem da via de transmissão.",
   },
+  ...enfermagemQuestionBank,
 ];
 
 export const totalTopics = subjects.reduce((total, subject) => total + subject.topics.length, 0);

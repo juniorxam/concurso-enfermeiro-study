@@ -27,7 +27,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { AnswerMap, questions, subjects, totalTopics } from "@/data/learning-data";
 
-const STORAGE_KEY = "trilha-enfermeiro:progress:v1";
+const STORAGE_KEY = "trilha-enfermeiro:progress:v2";
 const HERO_IMAGE = "/manus-storage/trilha-enfermeiro-hero_463c8870.jpg";
 const PATH_IMAGE = "/manus-storage/trilha-enfermeiro-percurso_43fef21f.jpg";
 const SIM_IMAGE = "/manus-storage/trilha-enfermeiro-simulado_f4b28381.jpg";

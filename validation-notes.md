@@ -12,4 +12,14 @@
 | Responsividade | Em 375 px, o índice se torna uma faixa de disciplinas, a trilha permanece navegável horizontalmente e as áreas de aula, questão e evidências preservam leitura e controles utilizáveis. |
 | Tipagem e build | `pnpm check` e `pnpm build` foram concluídos com êxito em 19 de agosto de 2026. O build emite apenas o aviso informativo de tamanho de chunk do Vite. |
 
+## Ampliação do banco — validação
+
+| Fluxo validado | Resultado observado |
+|---|---|
+| Carregamento do banco | A trilha de Processo de Enfermagem exibiu dez itens selecionáveis — um item existente mais nove itens novos — confirmando a incorporação do banco ampliado. |
+| Troca de bloco | Ao selecionar “SUS e gestão”, título, foco de leitura, estado de aula e nove itens autorais específicos foram atualizados em conjunto. |
+| Navegação entre itens | A seleção do Item 9 apresentou uma questão autoral distinta sobre avaliação de metas e revelou cinco alternativas homogêneas, com gabarito e explicação registrados no banco. |
+| Feedback e persistência | A resposta correta exibiu explicação, atualizou o indicador para 100% em 1 item e permaneceu contabilizada após o recarregamento da plataforma pela chave `trilha-enfermeiro:progress:v2`. |
+| Integridade técnica | A versão com 105 novos itens autorais foi aprovada em `pnpm check` e `pnpm build`. |
+
 Ainda serão conferidos visualmente os fluxos do simulado, a responsividade móvel e a composição geral antes do checkpoint de entrega.
