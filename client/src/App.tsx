@@ -1,3 +1,4 @@
+/** Direção visual: Caderno de Plantão — estrutura simples que mantém a plataforma em uma única estação de estudo. */
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
