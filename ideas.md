@@ -74,3 +74,6 @@ O símbolo combina uma **agulha de bússola**, uma cruz de cuidado construída p
 - A **linha de percurso** não deve parecer um stepper genérico: usa traço pontilhado levemente irregular, nós clínicos discretos e sensação de anotação manual sobre página de estudo.
 - Todo cartão principal deve funcionar como uma página ou ficha de caderno clínico, com margem, aba, carimbo ou linha editorial; caixas brancas sem materialidade são evitadas.
 - O wordmark **Trilha Enfermeiro** combina azul-tinta e o verde-clínico `#0B8E85` como sinal proprietário recorrente de orientação e avanço.
+- As superfícies de avaliação devem funcionar como **fichas de questão**: margem editorial, marcador de evidência e orientação de raciocínio substituem a aparência de quiz genérico.
+- O trilho lateral se comporta como **registro diário de estudo**, com linhas de caderno, carimbos informacionais e hierarquia contida; o azul-tinta escuro fica reservado ao simulado principal.
+- Nós ativos da linha de percurso carregam uma **anotação manuscrita** que liga o tópico, a ficha em curso e a próxima evidência de avanço.

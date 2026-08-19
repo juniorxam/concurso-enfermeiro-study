@@ -34,6 +34,10 @@ const SIM_IMAGE = "/manus-storage/trilha-enfermeiro-simulado_f4b28381.jpg";
 const LOGO_IMAGE = "/manus-storage/trilha-enfermeiro-logo_5a8da8e1.png";
 
 type Screen = "study" | "sim" | "result";
+type ThematicResult = { score: number; correct: number; answered: number; completedAt: string };
+type ThematicResultMap = Record<string, ThematicResult>;
+
+const THEMATIC_RESULTS_KEY = "trilha-enfermeiro:thematic-results:v1";
 
 function readStoredProgress() {
   if (typeof window === "undefined") return { completedTopicIds: [], answers: {} as AnswerMap };
@@ -47,6 +51,16 @@ function readStoredProgress() {
     };
   } catch {
     return { completedTopicIds: [], answers: {} as AnswerMap };
+  }
+}
+
+function readThematicResults(): ThematicResultMap {
+  if (typeof window === "undefined") return {};
+  try {
+    const stored = window.localStorage.getItem(THEMATIC_RESULTS_KEY);
+    return stored ? (JSON.parse(stored) as ThematicResultMap) : {};
+  } catch {
+    return {};
   }
 }
 
@@ -85,6 +99,8 @@ export default function Home() {
   const [simIndex, setSimIndex] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(50 * 60);
   const [simWarning, setSimWarning] = useState(false);
+  const [simTopicId, setSimTopicId] = useState<string | null>(null);
+  const [thematicResults, setThematicResults] = useState<ThematicResultMap>(() => readThematicResults());
 
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.id === activeSubjectId) ?? subjects[0],
@@ -100,9 +116,14 @@ export default function Home() {
   );
   const activeQuestion =
     topicQuestions.find((question) => question.id === selectedQuestionId) ?? topicQuestions[0];
+  const nursingSubject = subjects.find((subject) => subject.id === "enfermagem") ?? subjects[0];
+  const thematicTopics = nursingSubject.topics;
+  const activeSimTopic = thematicTopics.find((topic) => topic.id === simTopicId);
   const simQuestions = useMemo(
-    () => subjects.flatMap((subject) => pickBalancedQuestions(subject.id)),
-    [],
+    () => activeSimTopic
+      ? questions.filter((question) => question.topicId === activeSimTopic.id).slice(0, 20)
+      : subjects.flatMap((subject) => pickBalancedQuestions(subject.id)),
+    [activeSimTopic],
   );
   const currentSimQuestion = simQuestions[simIndex];
   const completedCount = completedTopicIds.length;
@@ -121,14 +142,27 @@ export default function Home() {
   }, [answers, completedTopicIds]);
 
   useEffect(() => {
+    window.localStorage.setItem(THEMATIC_RESULTS_KEY, JSON.stringify(thematicResults));
+  }, [thematicResults]);
+
+  useEffect(() => {
     if (screen !== "sim" || secondsLeft === 0) return;
     const timer = window.setInterval(() => setSecondsLeft((value) => Math.max(0, value - 1)), 1000);
     return () => window.clearInterval(timer);
   }, [screen, secondsLeft]);
 
   useEffect(() => {
-    if (secondsLeft === 0 && screen === "sim") setScreen("result");
-  }, [screen, secondsLeft]);
+    if (secondsLeft === 0 && screen === "sim") {
+      const hits = simQuestions.filter((question) => simAnswers[question.id] === question.correctIndex).length;
+      if (activeSimTopic) {
+        setThematicResults((current) => ({
+          ...current,
+          [activeSimTopic.id]: { score: Math.round((hits / simQuestions.length) * 100), correct: hits, answered: Object.keys(simAnswers).length, completedAt: new Date().toISOString() },
+        }));
+      }
+      setScreen("result");
+    }
+  }, [activeSimTopic, screen, secondsLeft, simAnswers, simQuestions]);
 
   const selectSubject = (subjectId: string) => {
     const subject = subjects.find((item) => item.id === subjectId) ?? subjects[0];
@@ -157,10 +191,11 @@ export default function Home() {
     setAnswers((current) => ({ ...current, [questionId]: index }));
   };
 
-  const startSim = () => {
+  const startSim = (topicId?: string) => {
     setSimAnswers({});
     setSimIndex(0);
-    setSecondsLeft(50 * 60);
+    setSimTopicId(topicId ?? null);
+    setSecondsLeft(topicId ? 45 * 60 : 50 * 60);
     setSimWarning(false);
     setScreen("sim");
   };
@@ -169,6 +204,13 @@ export default function Home() {
     if (simUnanswered > 0 && !simWarning) {
       setSimWarning(true);
       return;
+    }
+    const hits = simQuestions.filter((question) => simAnswers[question.id] === question.correctIndex).length;
+    if (activeSimTopic) {
+      setThematicResults((current) => ({
+        ...current,
+        [activeSimTopic.id]: { score: Math.round((hits / simQuestions.length) * 100), correct: hits, answered: simAnsweredCount, completedAt: new Date().toISOString() },
+      }));
     }
     setScreen("result");
   };
@@ -191,7 +233,7 @@ export default function Home() {
           </a>
           <div className="topbar-actions">
             <span className="sync-state"><span /> Progresso neste dispositivo</span>
-            <Button className="nav-sim-button" onClick={startSim}>
+            <Button className="nav-sim-button" onClick={() => startSim()}>
               <TimerReset size={15} /> Abrir simulado
             </Button>
           </div>
@@ -251,6 +293,7 @@ export default function Home() {
                     key={topic.id}
                     className={`path-node ${isCurrent ? "is-current" : ""} ${isDone ? "is-done" : ""}`}
                     onClick={() => selectTopic(topic.id)}
+                    data-annotation={isCurrent ? `ficha ${topic.order}` : isDone ? "revisado" : "percurso"}
                   >
                     <span>{isDone ? <Check size={13} /> : topic.order}</span>
                     <b>{topic.shortTitle}</b>
@@ -300,7 +343,7 @@ export default function Home() {
               </article>
 
               <article className="practice-card">
-                <div className="section-caption"><FileQuestion size={15} /> Questão autoral</div>
+                <div className="section-caption"><FileQuestion size={15} /> Ficha de questão <span>raciocínio clínico</span></div>
                 {activeQuestion ? (
                   <>
                     {topicQuestions.length > 1 && (
@@ -311,6 +354,7 @@ export default function Home() {
                       </div>
                     )}
                     <p className="question-statement">{activeQuestion.statement}</p>
+                    <div className="question-provenance"><span>leitura de evidência</span><p>Localize o contexto, reconheça o foco do cuidado e justifique mentalmente a conduta antes de marcar.</p></div>
                     <div className="answer-list" role="radiogroup" aria-label="Alternativas da questão">
                       {activeQuestion.alternatives.map((alternative, index) => {
                         const chosen = currentAnswer === index;
@@ -342,8 +386,8 @@ export default function Home() {
             </section>
           </section>
 
-          <aside className="evidence-rail" aria-label="Monitor de desempenho">
-            <div className="evidence-label">Registro de hoje</div>
+          <aside className="evidence-rail daily-register" aria-label="Monitor de desempenho">
+            <div className="evidence-label"><span>Registro de hoje</span><i>caderno clínico</i></div>
             <section className="evidence-hero" style={{ backgroundImage: `linear-gradient(110deg, rgba(16,42,58,.94), rgba(16,42,58,.57)), url(${HERO_IMAGE})` }}>
               <HeartPulse size={25} />
               <p>Uma trilha bem mantida faz o conteúdo aparecer na hora certa.</p>
@@ -357,7 +401,7 @@ export default function Home() {
                 {topicDone ? <><Check size={16} /> Concluído</> : <><ClipboardCheck size={16} /> Marcar como concluído</>}
               </Button>
             </section>
-            <section className="metric-card">
+            <section className="metric-card daily-metrics">
               <div><span>Avanço</span><b>{globalProgress}%</b><small>{completedCount} blocos</small></div>
               <div><span>Acerto</span><b>{accuracy}%</b><small>{answeredCount} itens</small></div>
               <div><span>Revisar</span><b>{Math.max(answeredCount - correctCount, 0)}</b><small>itens</small></div>
@@ -365,7 +409,23 @@ export default function Home() {
             <section className="exam-card">
               <div className="section-caption"><TimerReset size={15} /> Simulado equilibrado</div>
               <p>20 itens · 4 por disciplina · 50 minutos</p>
-              <Button onClick={startSim}><GraduationCap size={16} /> Começar agora</Button>
+              <Button onClick={() => startSim()}><GraduationCap size={16} /> Começar agora</Button>
+            </section>
+            <section className="thematic-bank" aria-label="Simulados temáticos por bloco específico">
+              <div className="section-caption"><ListChecks size={15} /> Simulados temáticos</div>
+              <p>Dez provas de 20 itens, uma para cada bloco específico.</p>
+              <div className="thematic-topic-list">
+                {thematicTopics.map((topic) => {
+                  const result = thematicResults[topic.id];
+                  return (
+                    <button key={topic.id} className="thematic-topic-button" onClick={() => startSim(topic.id)}>
+                      <span>{topic.order}</span>
+                      <div><b>{topic.shortTitle}</b><small>{result ? `Último resultado: ${result.score}%` : "20 itens · 45 min"}</small></div>
+                      <ChevronRight size={15} />
+                    </button>
+                  );
+                })}
+              </div>
             </section>
           </aside>
         </main>
@@ -374,6 +434,7 @@ export default function Home() {
   };
 
   const renderSim = () => {
+    const isThematic = Boolean(activeSimTopic);
     return (
       <main className="exam-shell">
         <header className="exam-header">
@@ -383,15 +444,15 @@ export default function Home() {
         </header>
         <section className="exam-intro" style={{ backgroundImage: `linear-gradient(95deg, rgba(16,42,58,.96), rgba(16,42,58,.69)), url(${SIM_IMAGE})` }}>
           <div>
-            <p className="eyebrow light">Modo prova · distribuição equilibrada</p>
-            <h1>Simulado de percurso</h1>
-            <p>Você terá 50 minutos para responder 20 itens originais, com quatro questões por disciplina. Use a folha de respostas para navegar sem perder o foco.</p>
+            <p className="eyebrow light">{isThematic ? `Simulado temático · ${activeSimTopic?.order}` : "Modo prova · distribuição equilibrada"}</p>
+            <h1>{isThematic ? activeSimTopic?.title : "Simulado de percurso"}</h1>
+            <p>{isThematic ? `Você terá 45 minutos para responder 20 itens autorais sobre ${activeSimTopic?.shortTitle}. Use a folha de respostas para navegar sem perder o foco.` : "Você terá 50 minutos para responder 20 itens originais, com quatro questões por disciplina. Use a folha de respostas para navegar sem perder o foco."}</p>
           </div>
           <div className="exam-rules"><ShieldCheck size={23} /><span>Respostas ficam neste dispositivo. A entrega só ocorre quando você confirmar.</span></div>
         </section>
         <section className="exam-workspace">
           <aside className="answer-sheet">
-            <div className="section-caption"><ListChecks size={15} /> Folha de respostas</div>
+            <div className="section-caption"><ListChecks size={15} /> {isThematic ? "Folha do tema" : "Folha de respostas"}</div>
             <div className="answer-grid">
               {simQuestions.map((question, index) => (
                 <button
@@ -407,7 +468,7 @@ export default function Home() {
             {simWarning && <div className="blank-warning"><b>Há {simUnanswered} item(ns) em branco.</b><span>Confira a folha ou clique novamente para entregar assim mesmo.</span></div>}
           </aside>
           <article className="exam-question">
-            <div className="exam-question-top"><span>Questão {simIndex + 1} de {simQuestions.length}</span><span>{subjects.find((subject) => subject.id === currentSimQuestion.subjectId)?.shortTitle}</span></div>
+            <div className="exam-question-top"><span>Questão {simIndex + 1} de {simQuestions.length}</span><span>{isThematic ? activeSimTopic?.shortTitle : subjects.find((subject) => subject.id === currentSimQuestion.subjectId)?.shortTitle}</span></div>
             <p>{currentSimQuestion.statement}</p>
             <div className="exam-options" role="radiogroup" aria-label="Alternativas da questão do simulado">
               {currentSimQuestion.alternatives.map((alternative, index) => (
@@ -433,6 +494,7 @@ export default function Home() {
   const renderResult = () => {
     const simCorrect = simQuestions.filter((question) => simAnswers[question.id] === question.correctIndex).length;
     const score = Math.round((simCorrect / simQuestions.length) * 100);
+    const isThematic = Boolean(activeSimTopic);
     return (
       <main className="result-shell">
         <header className="exam-header result-header">
@@ -442,22 +504,31 @@ export default function Home() {
         <section className="result-hero">
           <div className="result-seal"><Trophy size={31} /></div>
           <p className="eyebrow accent-text">Resultado registrado</p>
-          <h1>Você encerrou o simulado.</h1>
+          <h1>{isThematic ? `Você encerrou ${activeSimTopic?.shortTitle}.` : "Você encerrou o simulado."}</h1>
           <p>{simAnsweredCount} de {simQuestions.length} itens respondidos · {simCorrect} acertos</p>
           <strong>{score}%</strong>
         </section>
         <section className="result-body">
-          <div className="result-note"><Lightbulb size={21} /><p>O resultado abaixo é uma leitura por disciplina. Use os pontos de menor acerto para escolher a próxima revisão na trilha.</p></div>
-          <div className="result-table">
-            {subjects.map((subject) => {
-              const subjectQuestions = simQuestions.filter((question) => question.subjectId === subject.id);
-              const hits = subjectQuestions.filter((question) => simAnswers[question.id] === question.correctIndex).length;
-              const responses = subjectQuestions.filter((question) => simAnswers[question.id] !== undefined).length;
-              const rate = Math.round((hits / subjectQuestions.length) * 100);
-              return <div key={subject.id} className="result-row"><span className={`subject-mark mark-${subject.color}`}>{initials(subject.shortTitle)}</span><b>{subject.shortTitle}</b><span>{hits}/{subjectQuestions.length} acertos</span><div className="result-bar"><i style={{ width: `${rate}%` }} /></div><strong>{rate}%</strong><small>{responses === subjectQuestions.length ? "completa" : "incompleta"}</small></div>;
-            })}
-          </div>
-          <div className="result-actions"><Button onClick={() => setScreen("study")}><BookOpen size={16} /> Escolher revisão</Button><Button variant="outline" onClick={startSim}><RotateCcw size={16} /> Refazer simulado</Button></div>
+          <div className="result-note"><Lightbulb size={21} /><p>{isThematic ? `Use este resultado para retomar o bloco “${activeSimTopic?.shortTitle}” e revisar os itens que exigiram mais atenção.` : "O resultado abaixo é uma leitura por disciplina. Use os pontos de menor acerto para escolher a próxima revisão na trilha."}</p></div>
+          {isThematic ? (
+            <div className="thematic-result-card">
+              <span className="subject-mark mark-teal">{activeSimTopic?.order}</span>
+              <div><p>Desempenho no tema</p><b>{activeSimTopic?.title}</b><small>{simCorrect} acertos · {simAnsweredCount}/{simQuestions.length} respostas registradas</small></div>
+              <div className="result-bar"><i style={{ width: `${score}%` }} /></div>
+              <strong>{score}%</strong>
+            </div>
+          ) : (
+            <div className="result-table">
+              {subjects.map((subject) => {
+                const subjectQuestions = simQuestions.filter((question) => question.subjectId === subject.id);
+                const hits = subjectQuestions.filter((question) => simAnswers[question.id] === question.correctIndex).length;
+                const responses = subjectQuestions.filter((question) => simAnswers[question.id] !== undefined).length;
+                const rate = Math.round((hits / subjectQuestions.length) * 100);
+                return <div key={subject.id} className="result-row"><span className={`subject-mark mark-${subject.color}`}>{initials(subject.shortTitle)}</span><b>{subject.shortTitle}</b><span>{hits}/{subjectQuestions.length} acertos</span><div className="result-bar"><i style={{ width: `${rate}%` }} /></div><strong>{rate}%</strong><small>{responses === subjectQuestions.length ? "completa" : "incompleta"}</small></div>;
+              })}
+            </div>
+          )}
+          <div className="result-actions"><Button onClick={() => setScreen("study")}><BookOpen size={16} /> Escolher revisão</Button><Button variant="outline" onClick={() => startSim(activeSimTopic?.id)}><RotateCcw size={16} /> Refazer simulado</Button></div>
         </section>
       </main>
     );

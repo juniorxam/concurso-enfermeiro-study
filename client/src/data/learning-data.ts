@@ -5,6 +5,8 @@
  */
 
 import { enfermagemQuestionBank } from "./enfermagem-question-bank";
+import { enfermagemThematicSupplementA } from "./enfermagem-thematic-supplement-a";
+import { enfermagemThematicSupplementB } from "./enfermagem-thematic-supplement-b";
 
 export type Accent = "teal" | "coral" | "navy" | "sand";
 
@@ -527,6 +529,8 @@ export const questions: Question[] = [
     explanation: "As precauções-padrão orientam práticas seguras para todos os atendimentos conforme risco de exposição. Luvas não substituem a higiene das mãos e precauções específicas dependem da via de transmissão.",
   },
   ...enfermagemQuestionBank,
+  ...enfermagemThematicSupplementA,
+  ...enfermagemThematicSupplementB,
 ];
 
 export const totalTopics = subjects.reduce((total, subject) => total + subject.topics.length, 0);
