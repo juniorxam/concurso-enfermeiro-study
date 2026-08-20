@@ -77,3 +77,6 @@ O símbolo combina uma **agulha de bússola**, uma cruz de cuidado construída p
 - As superfícies de avaliação devem funcionar como **fichas de questão**: margem editorial, marcador de evidência e orientação de raciocínio substituem a aparência de quiz genérico.
 - O trilho lateral se comporta como **registro diário de estudo**, com linhas de caderno, carimbos informacionais e hierarquia contida; o azul-tinta escuro fica reservado ao simulado principal.
 - Nós ativos da linha de percurso carregam uma **anotação manuscrita** que liga o tópico, a ficha em curso e a próxima evidência de avanço.
+- O percurso deve ter **ritmo levemente irregular de tinta e papel**; a geometria perfeitamente uniforme é evitada em favor de nós anotados e marcas de folio.
+- O **verde-clínico** fica reservado a avanço, domínio, conclusão e orientação; navegação neutra e metadados usam azul-tinta, marfim e linhas discretas.
+- A tipografia serifada destaca somente títulos de página, blocos de estudo, perguntas e numerais-chave; instruções, listas e dados densos permanecem em Manrope.

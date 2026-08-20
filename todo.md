@@ -14,3 +14,11 @@
 - [x] Implementar o seletor de simulados temáticos e o fluxo de prova por bloco.
 - [x] Persistir resultado e desempenho por tema sem misturar respostas de versões anteriores.
 - [x] Validar entrega, resultado, retorno ao estudo e uso em tela móvel.
+
+## Conteúdo completo do edital
+
+- [x] Auditar os 26 blocos do edital e classificar as lacunas de estudo, revisão, prática e referência.
+- [x] Criar um guia autoral de estudo para cada bloco, com objetivos, pontos-chave, sequência de revisão e checklist.
+- [x] Integrar os guias à tela de estudo sem comprometer os simulados e os resultados já salvos.
+- [x] Reforçar a prática nos blocos gerais e tornar a navegação por revisão mais acionável.
+- [x] Validar a cobertura dos 26 blocos, a leitura em desktop e o uso em dispositivos móveis.

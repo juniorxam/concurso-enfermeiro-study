@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AnswerMap, questions, subjects, totalTopics } from "@/data/learning-data";
+import { studyGuides } from "@/data/study-guides";
 
 const STORAGE_KEY = "trilha-enfermeiro:progress:v2";
 const HERO_IMAGE = "/manus-storage/trilha-enfermeiro-hero_463c8870.jpg";
@@ -110,6 +111,7 @@ export default function Home() {
     () => activeSubject.topics.find((topic) => topic.id === activeTopicId) ?? activeSubject.topics[0],
     [activeSubject, activeTopicId],
   );
+  const activeGuide = studyGuides.find((guide) => guide.topicId === activeTopic.id);
   const topicQuestions = useMemo(
     () => questions.filter((question) => question.topicId === activeTopic.id),
     [activeTopic.id],
@@ -316,6 +318,30 @@ export default function Home() {
               </div>
             </article>
 
+            {activeGuide && (
+              <section className="study-guide-card" aria-label={`Guia de estudo: ${activeTopic.title}`}>
+                <div className="guide-heading">
+                  <div>
+                    <p className="eyebrow accent-text">Roteiro autoral de estudo</p>
+                    <h3>{activeGuide.headline}</h3>
+                    <p>{activeGuide.objective}</p>
+                  </div>
+                  <span className="guide-time"><Clock3 size={15} /> {activeGuide.estimatedTime}</span>
+                </div>
+                <div className="guide-essentials">
+                  {activeGuide.essentials.map((item, index) => <div key={item}><span>0{index + 1}</span><p>{item}</p></div>)}
+                </div>
+                <div className="guide-application">
+                  <div className="guide-sequence"><small>Sequência de resolução</small><p>{activeGuide.sequence}</p></div>
+                  <div className="guide-trap"><small>Armadilha recorrente</small><p>{activeGuide.commonTrap}</p></div>
+                </div>
+                <div className="guide-review">
+                  <div><span>Checklist de saída</span>{activeGuide.checkpoints.map((item) => <p key={item}><Check size={14} /> {item}</p>)}</div>
+                  <aside><Lightbulb size={17} /><small>Recuperação ativa</small><b>{activeGuide.recallPrompt}</b></aside>
+                </div>
+              </section>
+            )}
+
             <section className="learning-grid">
               <article className="video-card">
                 <div className="section-caption"><Play size={15} /> Aula de apoio</div>
@@ -337,7 +363,7 @@ export default function Home() {
                 ) : (
                   <div className="reading-fallback">
                     <BookOpen size={30} />
-                    <div><b>Leitura guiada em preparação</b><p>Use o foco de leitura deste bloco para organizar sua revisão. Este ponto ainda não possui vídeo público cadastrado.</p></div>
+                    <div><b>Leitura guiada disponível</b><p>O roteiro ao lado organiza a revisão deste bloco. Complete a ficha, resolva a prática e consulte a fonte indicada quando quiser aprofundar.</p>{activeGuide?.referenceUrl && <a href={activeGuide.referenceUrl} target="_blank" rel="noreferrer">{activeGuide.referenceLabel ?? "Abrir referência"} <ArrowUpRight size={14} /></a>}</div>
                   </div>
                 )}
               </article>

@@ -7,6 +7,7 @@
 import { enfermagemQuestionBank } from "./enfermagem-question-bank";
 import { enfermagemThematicSupplementA } from "./enfermagem-thematic-supplement-a";
 import { enfermagemThematicSupplementB } from "./enfermagem-thematic-supplement-b";
+import { generalPracticeBank } from "./general-practice-bank";
 
 export type Accent = "teal" | "coral" | "navy" | "sand";
 
@@ -531,6 +532,7 @@ export const questions: Question[] = [
   ...enfermagemQuestionBank,
   ...enfermagemThematicSupplementA,
   ...enfermagemThematicSupplementB,
+  ...generalPracticeBank,
 ];
 
 export const totalTopics = subjects.reduce((total, subject) => total + subject.topics.length, 0);
