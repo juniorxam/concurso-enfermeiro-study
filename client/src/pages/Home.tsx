@@ -29,10 +29,11 @@ import { AnswerMap, questions, subjects, totalTopics } from "@/data/learning-dat
 import { studyGuides } from "@/data/study-guides";
 
 const STORAGE_KEY = "trilha-enfermeiro:progress:v2";
-const HERO_IMAGE = "/manus-storage/trilha-enfermeiro-hero_463c8870.jpg";
-const PATH_IMAGE = "/manus-storage/trilha-enfermeiro-percurso_43fef21f.jpg";
-const SIM_IMAGE = "/manus-storage/trilha-enfermeiro-simulado_f4b28381.jpg";
-const LOGO_IMAGE = "/manus-storage/trilha-enfermeiro-logo_5a8da8e1.png";
+const PUBLIC_ASSET_BASE = "https://enfstudy-mwfidwju.manus.space/manus-storage";
+const HERO_IMAGE = `${PUBLIC_ASSET_BASE}/trilha-enfermeiro-hero_463c8870.jpg`;
+const PATH_IMAGE = `${PUBLIC_ASSET_BASE}/trilha-enfermeiro-percurso_43fef21f.jpg`;
+const SIM_IMAGE = `${PUBLIC_ASSET_BASE}/trilha-enfermeiro-simulado_f4b28381.jpg`;
+const LOGO_IMAGE = `${PUBLIC_ASSET_BASE}/trilha-enfermeiro-logo_5a8da8e1.png`;
 
 type Screen = "study" | "sim" | "result";
 type ThematicResult = { score: number; correct: number; answered: number; completedAt: string };

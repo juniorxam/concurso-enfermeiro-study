@@ -30,3 +30,10 @@
 - [x] Verificar tema, título, canal e URL de cada aula antes de cadastrar.
 - [x] Integrar players e links alternativos sem alterar o conteúdo, as questões ou o progresso existente.
 - [x] Validar a cobertura audiovisual e a navegação entre as aulas em desktop e móvel.
+
+## Publicação pelo GitHub
+
+- [ ] Verificar acesso ao repositório, branch padrão e permissões de GitHub Pages.
+- [ ] Preparar workflow de publicação estática e configuração de base compatível com Pages.
+- [ ] Habilitar a fonte de publicação autorizada e enviar a configuração ao repositório.
+- [ ] Validar a URL do GitHub Pages e registrar a rota de acesso.
