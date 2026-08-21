@@ -2,16 +2,20 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Router as WouterRouter, Switch } from "wouter";
+import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
 /** Direção visual: Caderno de Plantão — a estrutura permanece silenciosa para que a página editorial conduza o estudo. */
 function AppRoutes() {
+  const publishedBase = import.meta.env.BASE_URL.replace(/\/$/, "");
+
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      {publishedBase && <Route path={publishedBase} component={Home} />}
+      {publishedBase && <Route path={`${publishedBase}/`} component={Home} />}
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -33,9 +37,7 @@ function App() {
       >
       <TooltipProvider>
         <Toaster />
-          <WouterRouter base={import.meta.env.BASE_URL}>
-            <AppRoutes />
-          </WouterRouter>
+          <AppRoutes />
       </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
