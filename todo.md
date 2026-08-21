@@ -33,7 +33,17 @@
 
 ## Publicação pelo GitHub
 
-- [ ] Verificar acesso ao repositório, branch padrão e permissões de GitHub Pages.
-- [ ] Preparar workflow de publicação estática e configuração de base compatível com Pages.
-- [ ] Habilitar a fonte de publicação autorizada e enviar a configuração ao repositório.
-- [ ] Validar a URL do GitHub Pages e registrar a rota de acesso.
+- [x] Verificar acesso ao repositório, branch padrão e permissões de GitHub Pages.
+- [x] Preparar workflow de publicação estática e configuração de base compatível com Pages.
+- [x] Habilitar a fonte de publicação autorizada e enviar a configuração ao repositório.
+- [x] Validar a URL do GitHub Pages e registrar a rota de acesso.
+
+## Biblioteca FGV referenciada
+
+- [x] Localizar provas e gabaritos oficiais da FGV pertinentes a Enfermagem e aos conhecimentos gerais do edital.
+- [x] Catalogar referências por prova, ano, cargo, número da questão, tema e URL oficial, sem reproduzir enunciados ou alternativas.
+- [x] Produzir notas autorais de abordagem, revisão e armadilhas por referência catalogada.
+- [x] Integrar fichas de referência à plataforma sem misturar conteúdo FGV com questões autorais.
+- [x] Validar links oficiais, rotulagem de fonte e experiência móvel da biblioteca.
+
+> A biblioteca FGV funciona como índice de consulta: indica somente a prova, o item, o tema e uma nota de estudo autoral. O conteúdo integral permanece acessível exclusivamente no PDF oficial vinculado.

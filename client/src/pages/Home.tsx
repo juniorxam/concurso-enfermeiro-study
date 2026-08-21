@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AnswerMap, questions, subjects, totalTopics } from "@/data/learning-data";
+import { fgvReferences } from "@/data/fgv-references";
 import { studyGuides } from "@/data/study-guides";
 
 const STORAGE_KEY = "trilha-enfermeiro:progress:v2";
@@ -113,6 +114,10 @@ export default function Home() {
     [activeSubject, activeTopicId],
   );
   const activeGuide = studyGuides.find((guide) => guide.topicId === activeTopic.id);
+  const activeFgvReferences = useMemo(
+    () => fgvReferences.filter((reference) => reference.topicId === activeTopic.id),
+    [activeTopic.id],
+  );
   const topicQuestions = useMemo(
     () => questions.filter((question) => question.topicId === activeTopic.id),
     [activeTopic.id],
@@ -410,6 +415,26 @@ export default function Home() {
                   <div className="reading-fallback compact"><ClipboardCheck size={28} /><p>Este bloco está coberto na trilha e receberá novos itens de prática em uma próxima versão do banco.</p></div>
                 )}
               </article>
+
+              <section className="fgv-reference-card" aria-label={`Referências FGV: ${activeTopic.title}`}>
+                <div className="section-caption"><BookOpen size={15} /> Arquivo FGV <span>consulta externa</span></div>
+                {activeFgvReferences.length ? (
+                  <>
+                    <p className="fgv-intro">Referências de provas públicas para abrir na fonte oficial. A plataforma não reproduz o enunciado, as alternativas ou o gabarito da banca.</p>
+                    <div className="fgv-reference-list">
+                      {activeFgvReferences.map((reference) => (
+                        <a key={reference.id} className="fgv-reference-item" href={reference.sourceUrl} target="_blank" rel="noreferrer">
+                          <span className="fgv-question-number">Q{reference.questionNumber}</span>
+                          <div><b>{reference.label}</b><small>{reference.exam} · {reference.year} · {reference.role}</small><p>{reference.studyNote}</p></div>
+                          <ArrowUpRight size={16} />
+                        </a>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="fgv-empty"><BookOpen size={21} /><div><b>Sem referência FGV catalogada neste bloco</b><p>Mantenha a prática autoral e a revisão guiada. Este registro só recebe itens ligados a provas públicas oficiais com tema verificável.</p></div></div>
+                )}
+              </section>
             </section>
           </section>
 
