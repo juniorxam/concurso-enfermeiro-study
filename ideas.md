@@ -86,3 +86,6 @@ O símbolo combina uma **agulha de bússola**, uma cruz de cuidado construída p
 - A linha de percurso é o gesto visual proprietário: irregular, anotada e com ritmo de tinta sobre papel, nunca uma sequência perfeitamente uniforme de nós.
 - O trilho lateral privilegia slips, carimbos, anotações e respiro de livro-caixa; apenas uma ação decisiva recebe azul-tinta escuro por dobra visual.
 - A marca usa o símbolo de bússola-cuidado em tamanho editorial claro, como selo identificável da estação de estudo.
+- O percurso usa linha de tinta irregular, marcações de folio e anotação de nó ativo para conectar visualmente o bloco em curso à ficha de estudo.
+- Imagens promocionais são substituídas por superfícies de papel, grades clínicas e registros diagramáticos sempre que competirem com a metáfora de caderno.
+- CTAs nomeiam o gesto de estudo seguinte, como “Iniciar prova de percurso”, em vez de comandos genéricos de produto.

@@ -56,3 +56,12 @@
 - [x] Validar o retorno ao PDF, a persistência local, o resultado e a experiência móvel.
 
 > A primeira edição usa 20 referências ENARE 2024/2025 de Enfermagem Tipo 1. Cada cartão abre a prova oficial no número indicado; a correção usa o gabarito definitivo oficial, mas não reproduz o conteúdo da prova dentro da plataforma.
+
+## Simulado autoral estilo FGV
+
+- [x] Definir uma matriz de 20 itens inéditos, distribuída pelos blocos específicos de Enfermagem e com foco em aplicação, inferência e análise de caso.
+- [x] Redigir alternativas homogêneas e distratores plausíveis, sem reproduzir ou adaptar enunciados de provas da FGV.
+- [x] Integrar o novo simulado como modo autoral separado do arquivo FGV referenciado.
+- [x] Validar tempo, folha de respostas, resultado, explicações e uso móvel antes da publicação.
+
+> O modo “Estilo FGV · autoral” usa textos inéditos e treino de caso, prioridade, inferência e consequência. Ele não contém conteúdo de qualquer prova externa.
