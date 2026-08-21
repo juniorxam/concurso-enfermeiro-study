@@ -33,7 +33,7 @@
 
 ## Publicação pelo GitHub
 
-- [ ] Verificar acesso ao repositório, branch padrão e permissões de GitHub Pages.
-- [ ] Preparar workflow de publicação estática e configuração de base compatível com Pages.
-- [ ] Habilitar a fonte de publicação autorizada e enviar a configuração ao repositório.
-- [ ] Validar a URL do GitHub Pages e registrar a rota de acesso.
+- [x] Verificar acesso ao repositório, branch padrão e permissões de GitHub Pages.
+- [x] Preparar workflow de publicação estática e configuração de base compatível com Pages.
+- [x] Habilitar a fonte de publicação autorizada e enviar a configuração ao repositório.
+- [x] Validar a URL do GitHub Pages e registrar a rota de acesso.
