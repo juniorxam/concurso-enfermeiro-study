@@ -28,6 +28,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnswerMap, questions, subjects, totalTopics } from "@/data/learning-data";
 import { fgvEnareAnswerKeyUrl, fgvEnareSimReferences, fgvReferences } from "@/data/fgv-references";
 import { fgvStyleQuestionBank } from "@/data/fgv-style-question-bank";
+import { fgvStyleQuestionBankV2 } from "@/data/fgv-style-question-bank-v2";
 import { studyGuides } from "@/data/study-guides";
 
 const STORAGE_KEY = "trilha-enfermeiro:progress:v2";
@@ -42,10 +43,13 @@ type ThematicResult = { score: number; correct: number; answered: number; comple
 type ThematicResultMap = Record<string, ThematicResult>;
 type FgvSimResult = { score: number; correct: number; answered: number; completedAt: string };
 type FgvStyleResult = { score: number; correct: number; answered: number; completedAt: string };
+type FgvStyleVersion = "v1" | "v2";
+type FgvStyleResultMap = Partial<Record<FgvStyleVersion, FgvStyleResult>>;
 
 const THEMATIC_RESULTS_KEY = "trilha-enfermeiro:thematic-results:v1";
 const FGV_SIM_RESULT_KEY = "trilha-enfermeiro:fgv-enare-result:v1";
-const FGV_STYLE_RESULT_KEY = "trilha-enfermeiro:fgv-style-result:v1";
+const FGV_STYLE_LEGACY_RESULT_KEY = "trilha-enfermeiro:fgv-style-result:v1";
+const FGV_STYLE_RESULTS_KEY = "trilha-enfermeiro:fgv-style-results:v2";
 
 function readStoredProgress() {
   if (typeof window === "undefined") return { completedTopicIds: [], answers: {} as AnswerMap };
@@ -82,13 +86,15 @@ function readFgvSimResult(): FgvSimResult | null {
   }
 }
 
-function readFgvStyleResult(): FgvStyleResult | null {
-  if (typeof window === "undefined") return null;
+function readFgvStyleResults(): FgvStyleResultMap {
+  if (typeof window === "undefined") return {};
   try {
-    const stored = window.localStorage.getItem(FGV_STYLE_RESULT_KEY);
-    return stored ? (JSON.parse(stored) as FgvStyleResult) : null;
+    const stored = window.localStorage.getItem(FGV_STYLE_RESULTS_KEY);
+    if (stored) return JSON.parse(stored) as FgvStyleResultMap;
+    const legacy = window.localStorage.getItem(FGV_STYLE_LEGACY_RESULT_KEY);
+    return legacy ? { v1: JSON.parse(legacy) as FgvStyleResult } : {};
   } catch {
-    return null;
+    return {};
   }
 }
 
@@ -138,7 +144,8 @@ export default function Home() {
   const [fgvStyleIndex, setFgvStyleIndex] = useState(0);
   const [fgvStyleSecondsLeft, setFgvStyleSecondsLeft] = useState(50 * 60);
   const [fgvStyleWarning, setFgvStyleWarning] = useState(false);
-  const [fgvStyleResult, setFgvStyleResult] = useState<FgvStyleResult | null>(() => readFgvStyleResult());
+  const [fgvStyleVersion, setFgvStyleVersion] = useState<FgvStyleVersion>("v1");
+  const [fgvStyleResults, setFgvStyleResults] = useState<FgvStyleResultMap>(() => readFgvStyleResults());
 
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.id === activeSubjectId) ?? subjects[0],
@@ -170,7 +177,8 @@ export default function Home() {
   );
   const currentSimQuestion = simQuestions[simIndex];
   const currentFgvSimReference = fgvEnareSimReferences[fgvSimIndex];
-  const currentFgvStyleQuestion = fgvStyleQuestionBank[fgvStyleIndex];
+  const fgvStyleBank = fgvStyleVersion === "v2" ? fgvStyleQuestionBankV2 : fgvStyleQuestionBank;
+  const currentFgvStyleQuestion = fgvStyleBank[fgvStyleIndex];
   const completedCount = completedTopicIds.length;
   const globalProgress = Math.round((completedCount / totalTopics) * 100);
   const answeredCount = Object.keys(answers).length;
@@ -184,7 +192,7 @@ export default function Home() {
   const fgvSimAnsweredCount = Object.keys(fgvSimAnswers).length;
   const fgvSimUnanswered = fgvEnareSimReferences.length - fgvSimAnsweredCount;
   const fgvStyleAnsweredCount = Object.keys(fgvStyleAnswers).length;
-  const fgvStyleUnanswered = fgvStyleQuestionBank.length - fgvStyleAnsweredCount;
+  const fgvStyleUnanswered = fgvStyleBank.length - fgvStyleAnsweredCount;
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ completedTopicIds, answers }));
@@ -199,8 +207,8 @@ export default function Home() {
   }, [fgvSimResult]);
 
   useEffect(() => {
-    if (fgvStyleResult) window.localStorage.setItem(FGV_STYLE_RESULT_KEY, JSON.stringify(fgvStyleResult));
-  }, [fgvStyleResult]);
+    window.localStorage.setItem(FGV_STYLE_RESULTS_KEY, JSON.stringify(fgvStyleResults));
+  }, [fgvStyleResults]);
 
   useEffect(() => {
     if (screen !== "sim" || secondsLeft === 0) return;
@@ -242,10 +250,10 @@ export default function Home() {
 
   useEffect(() => {
     if (screen !== "fgv-style-sim" || fgvStyleSecondsLeft !== 0) return;
-    const correct = fgvStyleQuestionBank.filter((question) => fgvStyleAnswers[question.id] === question.correctIndex).length;
-    setFgvStyleResult({ score: Math.round((correct / fgvStyleQuestionBank.length) * 100), correct, answered: fgvStyleAnsweredCount, completedAt: new Date().toISOString() });
+    const correct = fgvStyleBank.filter((question) => fgvStyleAnswers[question.id] === question.correctIndex).length;
+    setFgvStyleResults((current) => ({ ...current, [fgvStyleVersion]: { score: Math.round((correct / fgvStyleBank.length) * 100), correct, answered: fgvStyleAnsweredCount, completedAt: new Date().toISOString() } }));
     setScreen("fgv-style-result");
-  }, [fgvStyleAnswers, fgvStyleAnsweredCount, fgvStyleSecondsLeft, screen]);
+  }, [fgvStyleAnswers, fgvStyleAnsweredCount, fgvStyleBank, fgvStyleSecondsLeft, fgvStyleVersion, screen]);
 
   const selectSubject = (subjectId: string) => {
     const subject = subjects.find((item) => item.id === subjectId) ?? subjects[0];
@@ -301,7 +309,8 @@ export default function Home() {
     setScreen("fgv-result");
   };
 
-  const startFgvStyleSim = () => {
+  const startFgvStyleSim = (version: FgvStyleVersion = "v1") => {
+    setFgvStyleVersion(version);
     setFgvStyleAnswers({});
     setFgvStyleIndex(0);
     setFgvStyleSecondsLeft(50 * 60);
@@ -314,8 +323,8 @@ export default function Home() {
       setFgvStyleWarning(true);
       return;
     }
-    const correct = fgvStyleQuestionBank.filter((question) => fgvStyleAnswers[question.id] === question.correctIndex).length;
-    setFgvStyleResult({ score: Math.round((correct / fgvStyleQuestionBank.length) * 100), correct, answered: fgvStyleAnsweredCount, completedAt: new Date().toISOString() });
+    const correct = fgvStyleBank.filter((question) => fgvStyleAnswers[question.id] === question.correctIndex).length;
+    setFgvStyleResults((current) => ({ ...current, [fgvStyleVersion]: { score: Math.round((correct / fgvStyleBank.length) * 100), correct, answered: fgvStyleAnsweredCount, completedAt: new Date().toISOString() } }));
     setScreen("fgv-style-result");
   };
 
@@ -583,9 +592,14 @@ export default function Home() {
             </section>
             <section className="fgv-style-launcher" aria-label="Simulado autoral estilo FGV">
               <div className="section-caption"><GraduationCap size={15} /> Estilo FGV · autoral</div>
-              <p>20 itens inéditos · casos e análise · 50 minutos</p>
-              <small>{fgvStyleResult ? `Último resultado: ${fgvStyleResult.score}% · ${fgvStyleResult.correct} acertos` : "Questões originais com cinco alternativas e raciocínio analítico."}</small>
-              <Button onClick={startFgvStyleSim}><ClipboardCheck size={16} /> Iniciar modo autoral</Button>
+              <p>40 itens inéditos · duas versões · 50 minutos cada</p>
+              <small>Escolha uma prova autoral para continuar a prática com casos, inferência e análise de consequência.</small>
+              <div className="fgv-style-version-list">
+                {(["v1", "v2"] as FgvStyleVersion[]).map((version) => {
+                  const result = fgvStyleResults[version];
+                  return <button key={version} className="fgv-style-version-button" onClick={() => startFgvStyleSim(version)}><span>V{version === "v1" ? "1" : "2"}</span><div><b>Prova autoral · Versão {version === "v1" ? "1" : "2"}</b><small>{result ? `Último resultado: ${result.score}% · ${result.correct} acertos` : "20 itens inéditos · iniciar prática"}</small></div><ChevronRight size={15} /></button>;
+                })}
+              </div>
             </section>
             <section className="thematic-bank" aria-label="Simulados temáticos por bloco específico">
               <div className="section-caption"><ListChecks size={15} /> Simulados temáticos</div>
@@ -791,7 +805,7 @@ export default function Home() {
       </header>
       <section className="exam-intro fgv-style-intro" style={{ backgroundImage: `linear-gradient(95deg, rgba(16,42,58,.96), rgba(16,42,58,.69)), url(${SIM_IMAGE})` }}>
         <div>
-          <p className="eyebrow light">Modo autoral · estilo analítico</p>
+          <p className="eyebrow light">Modo autoral · estilo analítico · Versão {fgvStyleVersion === "v1" ? "1" : "2"}</p>
           <h1>Decida, relacione, justifique.</h1>
           <p>Vinte itens inéditos de Enfermagem construídos para treinar caso profissional, aplicação de conceito e análise de consequência — sem reprodução de prova da FGV.</p>
         </div>
@@ -801,7 +815,7 @@ export default function Home() {
         <aside className="answer-sheet">
           <div className="section-caption"><ListChecks size={15} /> Folha autoral</div>
           <div className="answer-grid">
-            {fgvStyleQuestionBank.map((question, index) => (
+            {fgvStyleBank.map((question, index) => (
               <button key={question.id} onClick={() => setFgvStyleIndex(index)} className={`${fgvStyleIndex === index ? "is-current" : ""} ${fgvStyleAnswers[question.id] !== undefined ? "is-answered" : ""}`} aria-label={`Ir para questão ${index + 1}`}>{index + 1}</button>
             ))}
           </div>
@@ -810,7 +824,7 @@ export default function Home() {
           {fgvStyleWarning && <div className="blank-warning"><b>Há {fgvStyleUnanswered} item(ns) em branco.</b><span>Confira a folha ou clique novamente para entregar mesmo assim.</span></div>}
         </aside>
         <article className="exam-question fgv-style-question">
-          <div className="exam-question-top"><span>Questão {fgvStyleIndex + 1} de {fgvStyleQuestionBank.length}</span><span>Enfermagem · item autoral</span></div>
+          <div className="exam-question-top"><span>Questão {fgvStyleIndex + 1} de {fgvStyleBank.length}</span><span>Enfermagem · item autoral · V{fgvStyleVersion === "v1" ? "1" : "2"}</span></div>
           <p>{currentFgvStyleQuestion.statement}</p>
           <div className="fgv-style-method"><span>Leitura analítica</span><p>Identifique a relação entre contexto, prioridade e consequência antes de comparar as alternativas.</p></div>
           <div className="exam-options" role="radiogroup" aria-label="Alternativas da questão autoral estilo FGV">
@@ -828,28 +842,28 @@ export default function Home() {
   );
 
   const renderFgvStyleResult = () => {
-    const correct = fgvStyleQuestionBank.filter((question) => fgvStyleAnswers[question.id] === question.correctIndex).length;
-    const score = Math.round((correct / fgvStyleQuestionBank.length) * 100);
+    const correct = fgvStyleBank.filter((question) => fgvStyleAnswers[question.id] === question.correctIndex).length;
+    const score = Math.round((correct / fgvStyleBank.length) * 100);
     return (
       <main className="result-shell fgv-style-result-shell">
         <header className="exam-header result-header"><a className="brand compact-brand" href="#inicio"><img src={LOGO_IMAGE} alt="" /><span className="brand-word"><b>Trilha</b><em>Enfermeiro</em><small>caderno de prova</small></span></a><Button variant="outline" onClick={() => setScreen("study")}><BookOpen size={16} /> Voltar ao estudo</Button></header>
         <section className="result-hero">
           <div className="result-seal"><Trophy size={31} /></div>
-          <p className="eyebrow accent-text">Resultado autoral · estilo FGV</p>
+          <p className="eyebrow accent-text">Resultado autoral · estilo FGV · Versão {fgvStyleVersion === "v1" ? "1" : "2"}</p>
           <h1>Agora, revise o raciocínio.</h1>
-          <p>{fgvStyleAnsweredCount} de {fgvStyleQuestionBank.length} itens respondidos · {correct} acertos</p>
+          <p>{fgvStyleAnsweredCount} de {fgvStyleBank.length} itens respondidos · {correct} acertos</p>
           <strong>{score}%</strong>
         </section>
         <section className="result-body">
           <div className="result-note"><Lightbulb size={21} /><p>Este é um simulado inédito. A revisão abaixo mostra o eixo do raciocínio de cada item e ajuda a transformar o erro em uma próxima ação de estudo.</p></div>
           <section className="fgv-style-review" aria-label="Revisão das questões autorais">
-            {fgvStyleQuestionBank.map((question, index) => {
+            {fgvStyleBank.map((question, index) => {
               const selected = fgvStyleAnswers[question.id];
               const isCorrect = selected === question.correctIndex;
               return <article key={question.id} className={`fgv-style-review-item ${isCorrect ? "is-correct" : "is-review"}`}><span>{String(index + 1).padStart(2, "0")}</span><div><b>{isCorrect ? "Leitura consistente" : selected === undefined ? "Sem resposta registrada" : "Ponto para revisar"}</b><p>{question.explanation}</p></div>{isCorrect ? <CheckCircle2 size={18} /> : <Lightbulb size={18} />}</article>;
             })}
           </section>
-          <div className="result-actions"><Button onClick={startFgvStyleSim}><RotateCcw size={16} /> Refazer modo autoral</Button><Button variant="outline" onClick={() => setScreen("study")}><BookOpen size={16} /> Escolher revisão</Button></div>
+          <div className="result-actions"><Button onClick={() => startFgvStyleSim(fgvStyleVersion)}><RotateCcw size={16} /> Refazer Versão {fgvStyleVersion === "v1" ? "1" : "2"}</Button><Button variant="outline" onClick={() => setScreen("study")}><BookOpen size={16} /> Escolher revisão</Button></div>
         </section>
       </main>
     );

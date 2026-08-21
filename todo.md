@@ -65,3 +65,12 @@
 - [x] Validar tempo, folha de respostas, resultado, explicações e uso móvel antes da publicação.
 
 > O modo “Estilo FGV · autoral” usa textos inéditos e treino de caso, prioridade, inferência e consequência. Ele não contém conteúdo de qualquer prova externa.
+
+## Simulado autoral estilo FGV · Versão 2
+
+- [x] Definir a matriz de 20 novos itens, sem repetição de casos, conceitos-centrais ou alternativas da primeira versão.
+- [x] Redigir e revisar questões autorais com cinco alternativas, explicação de raciocínio e distribuição pelos dez blocos específicos.
+- [x] Criar seletor de versões e persistência independente para a Versão 2.
+- [x] Validar a navegação, correção, revisão explicada e uso móvel antes da publicação.
+
+> As Versões 1 e 2 persistem resultados de forma independente na chave versionada de simulados autorais. Cada prova tem 20 itens próprios, totalizando 40 itens inéditos de Enfermagem.
