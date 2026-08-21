@@ -8,6 +8,7 @@ import { enfermagemQuestionBank } from "./enfermagem-question-bank";
 import { enfermagemThematicSupplementA } from "./enfermagem-thematic-supplement-a";
 import { enfermagemThematicSupplementB } from "./enfermagem-thematic-supplement-b";
 import { generalPracticeBank } from "./general-practice-bank";
+import { videoLessons } from "./video-lessons";
 
 export type Accent = "teal" | "coral" | "navy" | "sand";
 
@@ -347,6 +348,13 @@ export const subjects: Subject[] = [
     ],
   },
 ];
+
+subjects.forEach((subject) => {
+  subject.topics.forEach((topic) => {
+    const lesson = videoLessons[topic.id];
+    if (lesson) Object.assign(topic, lesson);
+  });
+});
 
 export const questions: Question[] = [
   {

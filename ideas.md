@@ -80,3 +80,6 @@ O símbolo combina uma **agulha de bússola**, uma cruz de cuidado construída p
 - O percurso deve ter **ritmo levemente irregular de tinta e papel**; a geometria perfeitamente uniforme é evitada em favor de nós anotados e marcas de folio.
 - O **verde-clínico** fica reservado a avanço, domínio, conclusão e orientação; navegação neutra e metadados usam azul-tinta, marfim e linhas discretas.
 - A tipografia serifada destaca somente títulos de página, blocos de estudo, perguntas e numerais-chave; instruções, listas e dados densos permanecem em Manrope.
+- O wordmark é uma composição editorial: **Trilha** conduz a leitura em azul-tinta, **Enfermeiro** marca orientação em verde-clínico e a seta ascendente ecoa a bússola de cuidado.
+- O trilho de percurso inclui notas de folio, estrela de nó ativo e rótulo manuscrito de ficha atual para sustentar a metáfora de caderno de campo.
+- O registro diário usa slips, carimbos e linhas de livro-caixa; métricas continuam legíveis, mas deixam de se comportar como cartões de produto genéricos.

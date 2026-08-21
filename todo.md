@@ -22,3 +22,11 @@
 - [x] Integrar os guias à tela de estudo sem comprometer os simulados e os resultados já salvos.
 - [x] Reforçar a prática nos blocos gerais e tornar a navegação por revisão mais acionável.
 - [x] Validar a cobertura dos 26 blocos, a leitura em desktop e o uso em dispositivos móveis.
+
+## Videoaulas por bloco
+
+- [x] Mapear os 24 blocos ainda sem videoaula cadastrada e registrar os dois já verificados.
+- [x] Pesquisar videoaulas públicas específicas para os 26 blocos do edital.
+- [x] Verificar tema, título, canal e URL de cada aula antes de cadastrar.
+- [x] Integrar players e links alternativos sem alterar o conteúdo, as questões ou o progresso existente.
+- [x] Validar a cobertura audiovisual e a navegação entre as aulas em desktop e móvel.
