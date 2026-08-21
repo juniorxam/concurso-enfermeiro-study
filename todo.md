@@ -47,3 +47,12 @@
 - [x] Validar links oficiais, rotulagem de fonte e experiência móvel da biblioteca.
 
 > A biblioteca FGV funciona como índice de consulta: indica somente a prova, o item, o tema e uma nota de estudo autoral. O conteúdo integral permanece acessível exclusivamente no PDF oficial vinculado.
+
+## Simulado FGV referenciado
+
+- [x] Definir a seleção de itens e o fluxo de consulta ao PDF oficial sem exibir conteúdo protegido na plataforma.
+- [x] Verificar gabaritos oficiais e vincular letras de resposta somente aos itens selecionados.
+- [x] Implementar a resposta A–E, o cronômetro e o resultado separado dos simulados autorais.
+- [x] Validar o retorno ao PDF, a persistência local, o resultado e a experiência móvel.
+
+> A primeira edição usa 20 referências ENARE 2024/2025 de Enfermagem Tipo 1. Cada cartão abre a prova oficial no número indicado; a correção usa o gabarito definitivo oficial, mas não reproduz o conteúdo da prova dentro da plataforma.

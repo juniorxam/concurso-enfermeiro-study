@@ -18,6 +18,8 @@ const ENARE_PDF = "https://mapa-vagas-enare-ebserh.conhecimento.fgv.br/provas-ga
 const PMAM_PDF = "https://conhecimento.fgv.br/sites/default/files/concursos/oficial_da_pm_-_enfermeirons401_tipo_2.pdf";
 const TCESE_PDF = "https://conhecimento.fgv.br/sites/default/files/concursos/tcese/TCE_SE_Enfermeiro_(ENF)_Tipo_2.pdf";
 
+export const fgvEnareAnswerKeyUrl = "https://mapa-vagas-enare-ebserh.conhecimento.fgv.br/provas-gabaritos/multiuni/ENARE2024%20Gabarito%20Definitivo%20-%20Multi_Uniprofissional.pdf";
+
 export const fgvReferences: FgvReference[] = [
   { id: "fgv-e1-1", topicId: "enfermagem-sus", exam: "ENARE", year: "2024/2025", role: "Enfermagem · Tipo 1", questionNumber: 1, label: "Modelo assistencial e trajetória do SUS", studyNote: "Compare modelo previdenciário, universalidade e organização histórica do sistema antes de conferir o item na fonte.", sourceUrl: ENARE_PDF },
   { id: "fgv-e1-2", topicId: "enfermagem-sus", exam: "ENARE", year: "2024/2025", role: "Enfermagem · Tipo 1", questionNumber: 3, label: "Organização interfederativa do SUS", studyNote: "Revise instrumentos de pactuação e a relação entre normas, responsabilidades e planejamento em saúde.", sourceUrl: ENARE_PDF },
@@ -56,3 +58,36 @@ export const fgvReferences: FgvReference[] = [
   { id: "fgv-p3-1", topicId: "portugues-sintaxe", exam: "PMAM", year: "2021", role: "Oficial da PM – Enfermeiro · Tipo 2", questionNumber: 8, label: "Valor de preposição", studyNote: "Diferencie exigência de regência e valor semântico acrescentado pela preposição.", sourceUrl: PMAM_PDF },
   { id: "fgv-p4-1", topicId: "portugues-reescrita", exam: "PMAM", year: "2021", role: "Oficial da PM – Enfermeiro · Tipo 2", questionNumber: 9, label: "Reescrita e preservação de sentido", studyNote: "Compare estrutura, tempo verbal e sentido global antes de escolher uma reformulação.", sourceUrl: PMAM_PDF },
 ];
+
+type OfficialAnswer = "A" | "B" | "C" | "D" | "E";
+
+export type FgvSimReference = FgvReference & { officialAnswer: OfficialAnswer };
+
+const enareSimOfficialAnswers: Record<string, OfficialAnswer> = {
+  "fgv-e1-2": "B",
+  "fgv-e2-1": "A",
+  "fgv-e2-2": "E",
+  "fgv-e3-1": "C",
+  "fgv-e3-3": "D",
+  "fgv-e4-1": "A",
+  "fgv-e4-2": "E",
+  "fgv-e5-1": "D",
+  "fgv-e5-2": "C",
+  "fgv-e6-2": "E",
+  "fgv-e6-3": "B",
+  "fgv-e7-1": "A",
+  "fgv-e7-2": "A",
+  "fgv-e7-3": "C",
+  "fgv-e8-1": "C",
+  "fgv-e8-3": "C",
+  "fgv-e10-1": "C",
+  "fgv-e10-2": "D",
+  "fgv-e10-3": "C",
+  "fgv-e10-4": "A",
+};
+
+export const fgvEnareSimReferences: FgvSimReference[] = Object.entries(enareSimOfficialAnswers).map(([id, officialAnswer]) => {
+  const reference = fgvReferences.find((item) => item.id === id);
+  if (!reference) throw new Error(`Referência FGV não encontrada: ${id}`);
+  return { ...reference, officialAnswer };
+});

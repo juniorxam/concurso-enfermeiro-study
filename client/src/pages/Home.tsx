@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AnswerMap, questions, subjects, totalTopics } from "@/data/learning-data";
-import { fgvReferences } from "@/data/fgv-references";
+import { fgvEnareAnswerKeyUrl, fgvEnareSimReferences, fgvReferences } from "@/data/fgv-references";
 import { studyGuides } from "@/data/study-guides";
 
 const STORAGE_KEY = "trilha-enfermeiro:progress:v2";
@@ -36,11 +36,13 @@ const PATH_IMAGE = `${PUBLIC_ASSET_BASE}/trilha-enfermeiro-percurso_43fef21f.jpg
 const SIM_IMAGE = `${PUBLIC_ASSET_BASE}/trilha-enfermeiro-simulado_f4b28381.jpg`;
 const LOGO_IMAGE = `${PUBLIC_ASSET_BASE}/trilha-enfermeiro-logo_5a8da8e1.png`;
 
-type Screen = "study" | "sim" | "result";
+type Screen = "study" | "sim" | "result" | "fgv-sim" | "fgv-result";
 type ThematicResult = { score: number; correct: number; answered: number; completedAt: string };
 type ThematicResultMap = Record<string, ThematicResult>;
+type FgvSimResult = { score: number; correct: number; answered: number; completedAt: string };
 
 const THEMATIC_RESULTS_KEY = "trilha-enfermeiro:thematic-results:v1";
+const FGV_SIM_RESULT_KEY = "trilha-enfermeiro:fgv-enare-result:v1";
 
 function readStoredProgress() {
   if (typeof window === "undefined") return { completedTopicIds: [], answers: {} as AnswerMap };
@@ -64,6 +66,16 @@ function readThematicResults(): ThematicResultMap {
     return stored ? (JSON.parse(stored) as ThematicResultMap) : {};
   } catch {
     return {};
+  }
+}
+
+function readFgvSimResult(): FgvSimResult | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = window.localStorage.getItem(FGV_SIM_RESULT_KEY);
+    return stored ? (JSON.parse(stored) as FgvSimResult) : null;
+  } catch {
+    return null;
   }
 }
 
@@ -104,6 +116,11 @@ export default function Home() {
   const [simWarning, setSimWarning] = useState(false);
   const [simTopicId, setSimTopicId] = useState<string | null>(null);
   const [thematicResults, setThematicResults] = useState<ThematicResultMap>(() => readThematicResults());
+  const [fgvSimAnswers, setFgvSimAnswers] = useState<Record<string, string>>({});
+  const [fgvSimIndex, setFgvSimIndex] = useState(0);
+  const [fgvSecondsLeft, setFgvSecondsLeft] = useState(50 * 60);
+  const [fgvSimWarning, setFgvSimWarning] = useState(false);
+  const [fgvSimResult, setFgvSimResult] = useState<FgvSimResult | null>(() => readFgvSimResult());
 
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.id === activeSubjectId) ?? subjects[0],
@@ -134,6 +151,7 @@ export default function Home() {
     [activeSimTopic],
   );
   const currentSimQuestion = simQuestions[simIndex];
+  const currentFgvSimReference = fgvEnareSimReferences[fgvSimIndex];
   const completedCount = completedTopicIds.length;
   const globalProgress = Math.round((completedCount / totalTopics) * 100);
   const answeredCount = Object.keys(answers).length;
@@ -144,6 +162,8 @@ export default function Home() {
   const accuracy = answeredCount ? Math.round((correctCount / answeredCount) * 100) : 0;
   const simAnsweredCount = Object.keys(simAnswers).length;
   const simUnanswered = simQuestions.length - simAnsweredCount;
+  const fgvSimAnsweredCount = Object.keys(fgvSimAnswers).length;
+  const fgvSimUnanswered = fgvEnareSimReferences.length - fgvSimAnsweredCount;
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ completedTopicIds, answers }));
@@ -154,10 +174,20 @@ export default function Home() {
   }, [thematicResults]);
 
   useEffect(() => {
+    if (fgvSimResult) window.localStorage.setItem(FGV_SIM_RESULT_KEY, JSON.stringify(fgvSimResult));
+  }, [fgvSimResult]);
+
+  useEffect(() => {
     if (screen !== "sim" || secondsLeft === 0) return;
     const timer = window.setInterval(() => setSecondsLeft((value) => Math.max(0, value - 1)), 1000);
     return () => window.clearInterval(timer);
   }, [screen, secondsLeft]);
+
+  useEffect(() => {
+    if (screen !== "fgv-sim" || fgvSecondsLeft === 0) return;
+    const timer = window.setInterval(() => setFgvSecondsLeft((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [screen, fgvSecondsLeft]);
 
   useEffect(() => {
     if (secondsLeft === 0 && screen === "sim") {
@@ -171,6 +201,13 @@ export default function Home() {
       setScreen("result");
     }
   }, [activeSimTopic, screen, secondsLeft, simAnswers, simQuestions]);
+
+  useEffect(() => {
+    if (screen !== "fgv-sim" || fgvSecondsLeft !== 0) return;
+    const correct = fgvEnareSimReferences.filter((reference) => fgvSimAnswers[reference.id] === reference.officialAnswer).length;
+    setFgvSimResult({ score: Math.round((correct / fgvEnareSimReferences.length) * 100), correct, answered: fgvSimAnsweredCount, completedAt: new Date().toISOString() });
+    setScreen("fgv-result");
+  }, [fgvSecondsLeft, fgvSimAnswers, fgvSimAnsweredCount, screen]);
 
   const selectSubject = (subjectId: string) => {
     const subject = subjects.find((item) => item.id === subjectId) ?? subjects[0];
@@ -206,6 +243,24 @@ export default function Home() {
     setSecondsLeft(topicId ? 45 * 60 : 50 * 60);
     setSimWarning(false);
     setScreen("sim");
+  };
+
+  const startFgvSim = () => {
+    setFgvSimAnswers({});
+    setFgvSimIndex(0);
+    setFgvSecondsLeft(50 * 60);
+    setFgvSimWarning(false);
+    setScreen("fgv-sim");
+  };
+
+  const submitFgvSim = () => {
+    if (fgvSimUnanswered > 0 && !fgvSimWarning) {
+      setFgvSimWarning(true);
+      return;
+    }
+    const correct = fgvEnareSimReferences.filter((reference) => fgvSimAnswers[reference.id] === reference.officialAnswer).length;
+    setFgvSimResult({ score: Math.round((correct / fgvEnareSimReferences.length) * 100), correct, answered: fgvSimAnsweredCount, completedAt: new Date().toISOString() });
+    setScreen("fgv-result");
   };
 
   const submitSim = () => {
@@ -421,6 +476,7 @@ export default function Home() {
                 {activeFgvReferences.length ? (
                   <>
                     <p className="fgv-intro">Referências de provas públicas para abrir na fonte oficial. A plataforma não reproduz o enunciado, as alternativas ou o gabarito da banca.</p>
+                    <Button className="fgv-launch-button" onClick={startFgvSim}><ClipboardCheck size={16} /> Simulado FGV · 20 itens</Button>
                     <div className="fgv-reference-list">
                       {activeFgvReferences.map((reference) => (
                         <a key={reference.id} className="fgv-reference-item" href={reference.sourceUrl} target="_blank" rel="noreferrer">
@@ -462,6 +518,12 @@ export default function Home() {
               <div className="section-caption"><TimerReset size={15} /> Simulado equilibrado</div>
               <p>20 itens · 4 por disciplina · 50 minutos</p>
               <Button onClick={() => startSim()}><GraduationCap size={16} /> Começar agora</Button>
+            </section>
+            <section className="fgv-sim-launcher" aria-label="Simulado FGV referenciado">
+              <div className="section-caption"><FileQuestion size={15} /> Simulado FGV</div>
+              <p>20 referências ENARE · PDF oficial · 50 minutos</p>
+              <small>{fgvSimResult ? `Último resultado: ${fgvSimResult.score}% · ${fgvSimResult.correct} acertos` : "Leia o item na fonte e registre somente a letra."}</small>
+              <Button onClick={startFgvSim}><ClipboardCheck size={16} /> Abrir simulado</Button>
             </section>
             <section className="thematic-bank" aria-label="Simulados temáticos por bloco específico">
               <div className="section-caption"><ListChecks size={15} /> Simulados temáticos</div>
@@ -586,6 +648,80 @@ export default function Home() {
     );
   };
 
+  const renderFgvSim = () => (
+    <main className="exam-shell fgv-sim-shell">
+      <header className="exam-header">
+        <button onClick={() => setScreen("study")}><ArrowLeft size={17} /> Voltar ao caderno</button>
+        <a className="brand compact-brand" href="#inicio"><img src={LOGO_IMAGE} alt="" /><span className="brand-word"><b>Trilha</b><em>Enfermeiro</em><small>caderno de prova</small></span></a>
+        <div className="timer"><Clock3 size={17} /> {formatTime(fgvSecondsLeft)}</div>
+      </header>
+      <section className="exam-intro fgv-sim-intro" style={{ backgroundImage: `linear-gradient(95deg, rgba(16,42,58,.96), rgba(16,42,58,.69)), url(${SIM_IMAGE})` }}>
+        <div>
+          <p className="eyebrow light">Simulado referenciado · FGV / ENARE 2024/2025</p>
+          <h1>Consulte a fonte. Registre sua leitura.</h1>
+          <p>Este caderno reúne 20 referências de itens da prova oficial. Abra o PDF, localize o número indicado e marque somente a letra escolhida ao retornar.</p>
+        </div>
+        <div className="exam-rules"><ShieldCheck size={23} /><span>A plataforma não exibe enunciados ou alternativas da FGV. A correção usa o gabarito definitivo oficial e permanece separada dos simulados autorais.</span></div>
+      </section>
+      <section className="exam-workspace">
+        <aside className="answer-sheet">
+          <div className="section-caption"><ListChecks size={15} /> Folha FGV</div>
+          <div className="answer-grid">
+            {fgvEnareSimReferences.map((reference, index) => (
+              <button key={reference.id} onClick={() => setFgvSimIndex(index)} className={`${fgvSimIndex === index ? "is-current" : ""} ${fgvSimAnswers[reference.id] ? "is-answered" : ""}`} aria-label={`Ir para referência ${index + 1}`}>{index + 1}</button>
+            ))}
+          </div>
+          <p><i className="legend-dot answered" /> resposta registrada <i className="legend-dot current" /> atual</p>
+          <Button className="submit-button" onClick={submitFgvSim}><Trophy size={16} /> Entregar simulado</Button>
+          {fgvSimWarning && <div className="blank-warning"><b>Há {fgvSimUnanswered} item(ns) sem letra registrada.</b><span>Confira a folha ou clique novamente para entregar mesmo assim.</span></div>}
+        </aside>
+        <article className="exam-question fgv-sim-question">
+          <div className="exam-question-top"><span>Referência {fgvSimIndex + 1} de {fgvEnareSimReferences.length}</span><span>ENARE · questão {currentFgvSimReference.questionNumber}</span></div>
+          <p className="fgv-sim-topic">{currentFgvSimReference.label}</p>
+          <div className="fgv-source-step">
+            <span>Etapa 1 · fonte oficial</span>
+            <a href={currentFgvSimReference.sourceUrl} target="_blank" rel="noreferrer">Abrir o PDF da prova e localizar a questão {currentFgvSimReference.questionNumber} <ArrowUpRight size={15} /></a>
+            <p>{currentFgvSimReference.studyNote}</p>
+          </div>
+          <div className="fgv-answer-step"><span>Etapa 2 · sua resposta</span><p>Depois de ler o item no PDF oficial, registre a letra da alternativa escolhida.</p></div>
+          <div className="exam-options fgv-letter-options" role="radiogroup" aria-label="Registrar resposta da referência FGV">
+            {["A", "B", "C", "D", "E"].map((letter) => (
+              <button key={letter} role="radio" aria-checked={fgvSimAnswers[currentFgvSimReference.id] === letter} className={fgvSimAnswers[currentFgvSimReference.id] === letter ? "is-selected" : ""} onClick={() => { setFgvSimAnswers((current) => ({ ...current, [currentFgvSimReference.id]: letter })); setFgvSimWarning(false); }}><span>{letter}</span> Marcar alternativa {letter}</button>
+            ))}
+          </div>
+          <div className="exam-navigation">
+            <Button variant="outline" disabled={fgvSimIndex === 0} onClick={() => setFgvSimIndex((index) => index - 1)}>Anterior</Button>
+            <Button variant="outline" disabled={fgvSimIndex === fgvEnareSimReferences.length - 1} onClick={() => setFgvSimIndex((index) => index + 1)}>Próxima <ChevronRight size={16} /></Button>
+          </div>
+        </article>
+      </section>
+    </main>
+  );
+
+  const renderFgvResult = () => {
+    const correct = fgvEnareSimReferences.filter((reference) => fgvSimAnswers[reference.id] === reference.officialAnswer).length;
+    const score = Math.round((correct / fgvEnareSimReferences.length) * 100);
+    return (
+      <main className="result-shell fgv-result-shell">
+        <header className="exam-header result-header"><a className="brand compact-brand" href="#inicio"><img src={LOGO_IMAGE} alt="" /><span className="brand-word"><b>Trilha</b><em>Enfermeiro</em><small>caderno de prova</small></span></a><Button variant="outline" onClick={() => setScreen("study")}><BookOpen size={16} /> Voltar ao estudo</Button></header>
+        <section className="result-hero">
+          <div className="result-seal"><Trophy size={31} /></div>
+          <p className="eyebrow accent-text">Resultado FGV referenciado</p>
+          <h1>Leitura registrada na fonte oficial.</h1>
+          <p>{fgvSimAnsweredCount} de {fgvEnareSimReferences.length} itens respondidos · {correct} acertos</p>
+          <strong>{score}%</strong>
+        </section>
+        <section className="result-body">
+          <div className="result-note"><Lightbulb size={21} /><p>A correção foi calculada pelo gabarito definitivo oficial da FGV. As letras oficiais não são exibidas aqui: confira a publicação da banca se quiser revisar cada item na íntegra.</p></div>
+          <section className="fgv-result-source"><div><span>Fonte da correção</span><b>Gabarito definitivo · ENARE 2024/2025 · Enfermagem Tipo 1</b></div><a href={fgvEnareAnswerKeyUrl} target="_blank" rel="noreferrer">Abrir gabarito oficial <ArrowUpRight size={16} /></a></section>
+          <div className="result-actions"><Button onClick={startFgvSim}><RotateCcw size={16} /> Refazer simulado FGV</Button><Button variant="outline" onClick={() => setScreen("study")}><BookOpen size={16} /> Escolher revisão</Button></div>
+        </section>
+      </main>
+    );
+  };
+
+  if (screen === "fgv-sim") return renderFgvSim();
+  if (screen === "fgv-result") return renderFgvResult();
   if (screen === "sim") return renderSim();
   if (screen === "result") return renderResult();
   return renderStudy();

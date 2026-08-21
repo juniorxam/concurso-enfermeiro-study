@@ -83,3 +83,6 @@ O símbolo combina uma **agulha de bússola**, uma cruz de cuidado construída p
 - O wordmark é uma composição editorial: **Trilha** conduz a leitura em azul-tinta, **Enfermeiro** marca orientação em verde-clínico e a seta ascendente ecoa a bússola de cuidado.
 - O trilho de percurso inclui notas de folio, estrela de nó ativo e rótulo manuscrito de ficha atual para sustentar a metáfora de caderno de campo.
 - O registro diário usa slips, carimbos e linhas de livro-caixa; métricas continuam legíveis, mas deixam de se comportar como cartões de produto genéricos.
+- A linha de percurso é o gesto visual proprietário: irregular, anotada e com ritmo de tinta sobre papel, nunca uma sequência perfeitamente uniforme de nós.
+- O trilho lateral privilegia slips, carimbos, anotações e respiro de livro-caixa; apenas uma ação decisiva recebe azul-tinta escuro por dobra visual.
+- A marca usa o símbolo de bússola-cuidado em tamanho editorial claro, como selo identificável da estação de estudo.
