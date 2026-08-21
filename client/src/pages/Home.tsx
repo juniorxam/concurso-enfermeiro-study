@@ -844,6 +844,17 @@ export default function Home() {
   const renderFgvStyleResult = () => {
     const correct = fgvStyleBank.filter((question) => fgvStyleAnswers[question.id] === question.correctIndex).length;
     const score = Math.round((correct / fgvStyleBank.length) * 100);
+    const errorGroups = nursingSubject.topics.map((topic) => {
+      const errors = fgvStyleBank.filter((question) => question.topicId === topic.id && fgvStyleAnswers[question.id] !== question.correctIndex);
+      return { topic, errors, guide: studyGuides.find((item) => item.topicId === topic.id) };
+    }).filter((group) => group.errors.length > 0);
+    const returnToReviewTopic = (topicId: string) => {
+      const practiceQuestion = questions.find((question) => question.topicId === topicId);
+      setActiveSubjectId("enfermagem");
+      setActiveTopicId(topicId);
+      if (practiceQuestion) setSelectedQuestionId(practiceQuestion.id);
+      setScreen("study");
+    };
     return (
       <main className="result-shell fgv-style-result-shell">
         <header className="exam-header result-header"><a className="brand compact-brand" href="#inicio"><img src={LOGO_IMAGE} alt="" /><span className="brand-word"><b>Trilha</b><em>Enfermeiro</em><small>caderno de prova</small></span></a><Button variant="outline" onClick={() => setScreen("study")}><BookOpen size={16} /> Voltar ao estudo</Button></header>
@@ -856,6 +867,10 @@ export default function Home() {
         </section>
         <section className="result-body">
           <div className="result-note"><Lightbulb size={21} /><p>Este é um simulado inédito. A revisão abaixo mostra o eixo do raciocínio de cada item e ajuda a transformar o erro em uma próxima ação de estudo.</p></div>
+          <section className="automatic-review" aria-label="Revisão automática por bloco de assunto">
+            <div className="automatic-review-heading"><div><p className="eyebrow accent-text">Revisão automática</p><h2>Onde retomar o estudo</h2><p>Os erros foram agrupados pelo bloco de assunto. Abra a ficha indicada para revisar o conceito antes de refazer a prova.</p></div><span>{errorGroups.length} {errorGroups.length === 1 ? "bloco" : "blocos"} em foco</span></div>
+            {errorGroups.length ? <div className="automatic-review-list">{errorGroups.map(({ topic, errors, guide }) => <article key={topic.id} className="automatic-review-card"><div className="automatic-review-index"><span>{topic.order}</span><small>{errors.length} {errors.length === 1 ? "erro" : "erros"}</small></div><div className="automatic-review-copy"><p className="automatic-review-kicker">Conceito para retomar</p><h3>{topic.title}</h3><p className="automatic-review-focus">{guide?.objective ?? topic.focus}</p><div className="automatic-review-notes">{errors.map((question, index) => <p key={question.id}><b>Item {String(index + 1).padStart(2, "0")} · {fgvStyleAnswers[question.id] === undefined ? "sem resposta" : "revisar raciocínio"}.</b> {question.explanation}</p>)}</div></div><Button variant="outline" onClick={() => returnToReviewTopic(topic.id)}>Abrir ficha <ArrowUpRight size={15} /></Button></article>)}</div> : <div className="automatic-review-clear"><CheckCircle2 size={22} /><div><b>Nenhum bloco prioritário nesta prova.</b><p>Você acertou todos os itens do simulador. Retome a Versão {fgvStyleVersion === "v1" ? "2" : "1"} ou avance para os simulados temáticos para variar a prática.</p></div></div>}
+          </section>
           <section className="fgv-style-review" aria-label="Revisão das questões autorais">
             {fgvStyleBank.map((question, index) => {
               const selected = fgvStyleAnswers[question.id];

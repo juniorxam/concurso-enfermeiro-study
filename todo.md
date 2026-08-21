@@ -74,3 +74,12 @@
 - [x] Validar a navegação, correção, revisão explicada e uso móvel antes da publicação.
 
 > As Versões 1 e 2 persistem resultados de forma independente na chave versionada de simulados autorais. Cada prova tem 20 itens próprios, totalizando 40 itens inéditos de Enfermagem.
+
+## Revisão automática por bloco
+
+- [x] Definir a leitura de erros por tópico e a prioridade de revisão dentro dos resultados autorais.
+- [x] Criar cartões que agrupem erros, expliquem o conceito a retomar e indiquem uma ação por bloco.
+- [x] Conectar cada cartão à ficha de estudo correspondente sem perder a análise do resultado.
+- [x] Validar agrupamentos, estados sem erro, responsividade e retorno ao estudo.
+
+> A revisão automática trata cada resposta incorreta ou em branco como ponto de retomada. Cada cartão reúne os erros de um bloco, apresenta a explicação autoral dos itens e abre a ficha de estudo correspondente.

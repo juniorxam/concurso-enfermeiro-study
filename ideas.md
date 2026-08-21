@@ -89,3 +89,6 @@ O símbolo combina uma **agulha de bússola**, uma cruz de cuidado construída p
 - O percurso usa linha de tinta irregular, marcações de folio e anotação de nó ativo para conectar visualmente o bloco em curso à ficha de estudo.
 - Imagens promocionais são substituídas por superfícies de papel, grades clínicas e registros diagramáticos sempre que competirem com a metáfora de caderno.
 - CTAs nomeiam o gesto de estudo seguinte, como “Iniciar prova de percurso”, em vez de comandos genéricos de produto.
+- Cada dobra preserva uma prioridade editorial dominante; selos, abas e metadados entram como apoio silencioso, nunca como concorrentes da leitura principal.
+- O verde-clínico identifica avanço, orientação e domínio; informações neutras retornam ao azul-tinta, marfim e às linhas de caderno.
+- O masthead funciona como selo editorial reconhecível: bússola-cuidado e wordmark recebem precedência sobre controles funcionais.
